@@ -1,11 +1,11 @@
 <p align="center">
 <img width="680px" src="https://user-images.githubusercontent.com/16992394/65840473-f70ca780-e319-11e9-9245-29ec0a8948d6.png">
 </p>
-<h2 align="center">Elastic Stack on Docker, with preconfigured security, tools, self-monitoring, and Prometheus Metrics Exporters</h2>
+<h2 align="center">Elastic Stack on Docker with Preconfigured Security, Tools, Self-Monitoring, and Prometheus Metrics Exporters</h2>
 <h4 align="center">With tools like Curator, Rubban, ElastAlert for Alerting.</h4>
 <p align="center">
    <a>
-      <img src="https://img.shields.io/badge/Elastic%20Stack-7.9.1-blue?style=flat&logo=elasticsearch" alt="Elastic Stack Version 7^^">
+      <img src="https://img.shields.io/badge/Elastic%20Stack-7.12.0-blue?style=flat&logo=elasticsearch" alt="Elastic Stack Version 7^^">
    </a>
    <a>
       <img src="https://img.shields.io/github/v/tag/sherifabdlnaby/elastdocker?label=release&amp;sort=semver">
@@ -25,11 +25,11 @@
 </p>
 
 # Introduction
-Elastic Stack (AKA **ELK**) Docker Composition, preconfigured with **Security**, **Monitoring**, and Tools Up with a Single Command.
+Elastic Stack (**ELK**) Docker Composition, preconfigured with **Security**, **Monitoring**, and **Tools**; Up with a Single Command.
 
 Based on [Official Elastic Docker Images](https://www.docker.elastic.co/)
 
-Stack Version: [7.9.1](https://www.elastic.co/blog/elastic-stack-7-9-1-released).
+Stack Version: [7.12.0](https://www.elastic.co/blog/elastic-stack-7-12-0-released)
 > You can change Elastic Stack version by setting `ELK_VERSION` in `.env` file and rebuild your images. Any version >= 7.0.0 is compatible with this template.
 
 ### Main Features 📜
@@ -87,6 +87,7 @@ Elastdocker differs from `deviantony/docker-elk` in the following points.
 
 - [Docker 17.05 or higher](https://docs.docker.com/install/)
 - [Docker-Compose 3 or higher](https://docs.docker.com/compose/install/)
+- 4GB RAM (For Windows and MacOS make sure Docker's VM has more than 4GB+ memory.)
 
 # Setup
 
@@ -94,38 +95,39 @@ Elastdocker differs from `deviantony/docker-elk` in the following points.
      ```bash
      git clone https://github.com/sherifabdlnaby/elastdocker.git
      ```
-     or:
-    <a href="https://github.com/sherifabdlnaby/elastdocker/generate"><img src="https://user-images.githubusercontent.com/16992394/92532187-08e81180-f230-11ea-96c9-07e9331411bc.png" alt="create repository from template"></a>
-
-2. Initialize Elasticsearch Keystore and SSL Certificates
-    ```shell
+2. Initialize Elasticsearch Keystore and TLS Self-Signed Certificates
+    ```bash
     $ make setup
     ```
+    > **For Linux's docker hosts only**. By default virtual memory [is not enough](https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html) so run the next command as root `sysctl -w vm.max_map_count=262144`
 3. Start Elastic Stack
-    ```shell
-    $ make elk
-    ---- OR ----
-    $ docker-compose up -d
+    ```bash
+    $ make elk           <OR>         $ docker-compose up -d
     ```
-4. Visit Kibana at [https://localhost:5601](https://localhost:5601)
+4. Visit Kibana at [https://localhost:5601](https://localhost:5601) or `https://<your_public_ip>:5601`
 
-    Notice that Kibana is configured to use HTTPS, so you'll need to write `https://` before `localhost:5601` in the browser.
+    Default Username: `elastic`, Password: `changeme`
 
-    Username: `elastic` Password: `changeme`
+    > - Notice that Kibana is configured to use HTTPS, so you'll need to write `https://` before `localhost:5601` in the browser.
+    > - Modify `.env` file for your needs, most importantly `ELASTIC_PASSWORD` that setup your superuser `elastic`'s password, `ELASTICSEARCH_HEAP` & `LOGSTASH_HEAP` for Elasticsearch & Logstash Heap Size.
 
-    > Modify `.env` file for your needs, most importantly `ELASTIC_PASSWORD` that setup your superuser `elastic`'s password, `ELASTICSEARCH_HEAP` & `LOGSTASH_HEAP` for Elasticsearch & Logstash Heap Size.
-
-Whatever your Host (e.g AWS EC2, Azure, On-premise server), once you expose your host to the network ELK component will be accessible on their respective ports.
+Whatever your Host (e.g AWS EC2, Azure, DigitalOcean, or on-premise server), once you expose your host to the network, ELK component will be accessible on their respective ports.
 
 ### Docker Swarm Support
 
 Elastdocker can be deployed to Docker Swarm using `make swarm-deploy`
+
+<details><summary>Expand</summary>
+<p>
 
 However it is not recommended to [depend on Docker Swarm](https://boxboat.com/2019/12/10/migrate-docker-swarm-to-kubernetes/); if your scale needs a multi-host cluster to host your ELK then Kubernetes is the recommended next step.
 
 Elastdocker should be used for small production workloads enough to fit on a single host.
 
 > Docker Swarm lacks some features such as `ulimits` used to disable swapping in Elasticsearch container, please change `bootstrap.memory_lock` to `false` in docker-compose.yml and find an [alternative way](https://www.elastic.co/guide/en/elasticsearch/reference/master/setup-configuration-memory.html) to disable swapping in your swarm cluster.
+
+</p>
+</details>
 
 ## Additional Commands
 
@@ -169,7 +171,7 @@ $ make prune
 
 * Some Configuration are parameterized in the `.env` file.
   * `ELASTIC_PASSWORD`, user `elastic`'s password (default: `changeme` _pls_).
-  * `ELK_VERSION` Elastic Stack Version (default: `7.9.1`)
+  * `ELK_VERSION` Elastic Stack Version (default: `7.12.0`)
   * `ELASTICSEARCH_HEAP`, how much Elasticsearch allocate from memory (default: 1GB -good for development only-)
   * `LOGSTASH_HEAP`, how much Logstash allocate from memory.
   * Other configurations which their such as cluster name, and node name, etc.
